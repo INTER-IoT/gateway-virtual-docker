@@ -1,0 +1,25 @@
+language: java
+jdk:
+  - oraclejdk8
+services:
+  - docker
+script:
+  - mvn clean package -f src/pom.xml
+  - docker build -t interiot/vgateway:latest .
+  - if [[ -n "$TRAVIS_TAG" ]]; then docker tag interiot/vgateway:latest "interiot/vgateway:$TRAVIS_TAG"; fi
+notifications:
+  email: false
+before_deploy: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+deploy:
+  provider: script
+  script: docker push interiot/vgateway:latest && docker push "interiot/vgateway:$TRAVIS_TAG"
+  on:
+    repo: INTER-IoT/gateway-virtual-docker
+    tags: true
+    branches:
+      only:
+      - master
+env:
+  global:
+  - secure: cGCkJI9sn/xeMMhh4OjfwIVICJgoBKh1h1jxXapWiDhQKVlqrBEtne3j8sOQ+2jB99GcZkVnPQScS89E8ydMHmQGOuBcBKB2lFXXl8yEjt+Jqf/gLEWgiTgWt2itlEMuLSVOSRrx2GXuO/l9A3GDAA0OF5c/QumVsXR/ca3XddXk0jzyrHV0XcONLbJchpW+xwzLQLavJV/GE6OuFTxNFAkUV0ob5O8UTY25X2Aifw2e2pAMVcJ6G8EiogUB3+cziNo+CwW8OD/Xt/MC+SFcLiuaUKUSXRQxNm5snz1EdHy7J4At961cqT09HYD6HDhR5NFK7PrG9fjQ0Wf8om7uiUp9bpgSMHvDofsJyLz2zwguNvtvHYZrI00KdoBNLWZAu+jXe0Kh4JiBvd4FfmY/HVIO3xnZ9vCWCJ22dl89WIQcLsJuPw/tI0TJM1jXmgWxS0oyVjauWgBsUO8APF5DcuXLAzf942QXuCxQo4Px7a1dhnhNhdWDWji940BjEoKb4GnxxDWW6gcX6Qfvg0YT4XxkM5w9XxbHFmbD0UQBTmwYZQDlPOiB5Jjj/CGWV+eMS81dlpkrjlrNNbQuXfCbKc0jjEYrIvdeMgGt4ruyfJd8r92o6gDmkBuhqsEYZKJBE6KEGzIQwCUH3eQJTKCZxcKMcEkJJrfbSTDPqxBeOSM=
+  - secure: dYRxKnfkvRjKJBiPCcz7FFH6LJpP00sqiIkiuHje7vy7miRTf9sutexb5sRVkBL2kiVKzcIhaoWZliop7uLj7H8SV+n3UNHUHv89Su0YchfhjdfkC7yG07cEv0XvuH/EBp8qbAMnWZQcvyrRHEzxn4WzkybxxY1h8qtJkZThluFmTDw/ghUueAgXDuq4zrMc8+QaH4RpTxKNrND/b1gYSzwmbB3KDI7I+vHzvAFV+g1G1c7BRgRdTkaS9udZLdrR183DJm9mvqCehCyMd9WnCqLl8KquGnQOdcNx/S/5cQnLwk4BeYrsQF4grrpQIQKB1zcJtodoy3coVBm1yIvR4+tG9mLLzAOcSNyUDa5Sd4dVOnjJqFJQ8kl2EQp21sDRBOBNzLxtKFNqRj+eURdNDiN4PUFcX8xdV38Y9UjHdvm5FgJwvo8rEkW1pqJygTRnuVGWcOsfiH4/qPbNGLg4DhB+yNB7Oj7uNcvN6VoJqOtN5g7fxwG/cH7EarANI/wFLCUtsrrdHKIzh4Qw+CDFJs6ukcNKuirc0wEf4cC8MbHAXVbfZVL+3YJm0PXI5+oYxbI3riF9F6mmXXyAkHIvYuidxPDNNE9FMVzqgfegMUA+QvYlIZdo0pmkuYt3E9QpZahQPzfh87OImiS8uTbMLZMEAMqlveXcVVmb7R7/ZxY=
